@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumSIA - Quantum IDE & Sandbox</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Monaco Editor Loader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation / Header -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fa-solid fa-atom quantum-logo"></i>
+                <span class="logo-text">Quantum<span class="logo-accent">SIA</span></span>
+                <span class="badge">MVP v1.0</span>
+            </div>
+            
+            <div class="controls-header">
+                <button id="run-btn" class="btn btn-primary">
+                    <i class="fa-solid fa-play"></i>
+                    <span>Run Program</span>
+                </button>
+                <div class="loading-spinner" id="loader">
+                    <div class="spinner-ring"></div>
+                </div>
+            </div>
+            
+            <div class="settings-trigger" id="settings-toggle">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- Sidebar / Templates -->
+            <aside class="app-sidebar">
+                <div class="sidebar-section">
+                    <h3><i class="fa-solid fa-file-code"></i> Templates</h3>
+                    <ul class="template-list">
+                        <li class="template-item active" data-template="bell">
+                            <span class="template-title">Bell State</span>
+                            <span class="template-desc">Entangles 2 qubits (H + CNOT)</span>
+                        </li>
+                        <li class="template-item" data-template="ghz">
+                            <span class="template-title">GHZ State</span>
+                            <span class="template-desc">Entangles 3 qubits (H + 2 CNOT)</span>
+                        </li>
+                        <li class="template-item" data-template="superposition">
+                            <span class="template-title">Superposition</span>
+                            <span class="template-desc">Hadamard on 5 qubits</span>
+                        </li>
+                        <li class="template-item" data-template="custom">
+                            <span class="template-title">Blank Editor</span>
+                            <span class="template-desc">Write your own quantum algorithm</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-section sandbox-info">
+                    <h3><i class="fa-solid fa-shield-halved"></i> Secure Sandbox</h3>
+                    <p>Allowed imports:</p>
+                    <div class="tag-container">
+                        <span class="tag">numpy</span>
+                        <span class="tag">requests</span>
+                        <span class="tag">sia</span>
+                        <span class="tag">collections</span>
+                        <span class="tag">math</span>
+                    </div>
+                    <p class="limit-note"><i class="fa-solid fa-clock"></i> Timeout: 10s</p>
+                    <p class="limit-note"><i class="fa-solid fa-hard-drive"></i> Limit: 1 MB stdout</p>
+                </div>
+            </aside>
+
+            <!-- Editor Section -->
+            <section class="editor-section">
+                <div class="pane-header">
+                    <span class="pane-title"><i class="fa-brands fa-python"></i> main.py</span>
+                    <span class="editor-status" id="editor-status">Ready</span>
+                </div>
+                <div class="editor-container" id="editor"></div>
+            </section>
+
+            <!-- Output / Console & Visualization Section -->
+            <section class="output-section">
+                <!-- Navigation Tabs for Output -->
+                <div class="output-tabs">
+                    <button class="tab-btn active" data-tab="console">
+                        <i class="fa-solid fa-terminal"></i> Console Output
+                    </button>
+                    <button class="tab-btn" data-tab="visualizer">
+                        <i class="fa-solid fa-chart-simple"></i> State Vector Visualizer
+                    </button>
+                </div>
+
+                <!-- Tab Content: Console -->
+                <div class="tab-content active" id="tab-console">
+                    <pre class="console-output" id="console">Initializing QuantumSIA runtime...
+Choose a template and click "Run Program" to execute.
+</pre>
+                </div>
+
+                <!-- Tab Content: Visualizer -->
+                <div class="tab-content" id="tab-visualizer">
+                    <div class="visualizer-container">
+                        <div class="no-states-msg" id="no-states-msg">
+                            <i class="fa-solid fa-chart-column"></i>
+                            <p>No quantum simulation data. Run a quantum program containing `sia` operations to view state probabilities.</p>
+                        </div>
+                        <div class="chart-content hidden" id="chart-content">
+                            <div class="chart-header">
+                                <span class="chart-title">Probability Distribution (Computational Basis States)</span>
+                            </div>
+                            <div class="chart-bars" id="chart-bars">
+                                <!-- Bars will be inserted dynamically here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Settings Modal -->
+        <div class="modal-overlay" id="settings-modal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2><i class="fa-solid fa-sliders"></i> Environment Configuration</h2>
+                    <span class="close-modal" id="close-settings">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="backend-url-input">Backend Base URL</label>
+                        <input type="text" id="backend-url-input" placeholder="e.g., http://localhost:8000" />
+                        <small>Leave empty to use the origin server URL (default).</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="api-key-input">SIA API Key</label>
+                        <input type="password" id="api-key-input" placeholder="e.g., test_token_123" />
+                        <small>Authentication key for the HDQS quantum service connection.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="cancel-settings">Cancel</button>
+                    <button class="btn btn-primary" id="save-settings">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
