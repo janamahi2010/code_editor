@@ -152,7 +152,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     cancelSettings.addEventListener('click', hideModal);
 
     saveSettings.addEventListener('click', () => {
-        localStorage.setItem('sia_backend_url', backendUrlInput.value.trim());
+        const backendUrl = backendUrlInput.value.trim();
+        localStorage.setItem('sia_backend_url', backendUrl ? ApiClient.cleanUrl(backendUrl) : '');
         localStorage.setItem('sia_api_key', apiKeyInput.value.trim());
         hideModal();
         
