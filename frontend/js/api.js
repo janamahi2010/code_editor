@@ -5,24 +5,21 @@ const ApiClient = {
     // Used only as the base_url baked into sandboxed script templates.
     HDQS_SERVICE_URL: 'http://31.97.239.213:8000',
 
-    // Execution backend: this repo's own FastAPI app, which serves /run and also
-    // serves the frontend it's running (see main.py's StaticFiles mount). Same-origin
-    // works whenever this app is accessed via that combined service (incl. local dev).
-    //
-    // The frontend is additionally deployed on its own as a static site (no backend
-    // attached), so requests from that host must be redirected to the real backend.
-    STATIC_FRONTEND_HOST: 'code-editor-1-l8ec.onrender.com',
-    COMBINED_SERVICE_URL: 'https://code-editor-pq97.onrender.com',
+    // Execution backend: /run requests go through the dispatcher, which load-balances
+    // across the 10 real backend instances (see dispatcher/main.py) instead of hitting
+    // a single one directly. Only local dev bypasses it, to test local backend changes.
+    DISPATCHER_URL: 'https://code-editor-10.onrender.com',
 
     getBackendUrl() {
         const storedUrl = localStorage.getItem('sia_backend_url_v2');
         if (storedUrl && storedUrl.trim() !== '') {
             return this.cleanUrl(storedUrl);
         }
-        if (window.location.hostname === this.STATIC_FRONTEND_HOST) {
-            return this.COMBINED_SERVICE_URL;
+        const hostname = window.location.hostname;
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return window.location.origin;
         }
-        return window.location.origin;
+        return this.DISPATCHER_URL;
     },
 
     getHdqsServiceUrl() {
