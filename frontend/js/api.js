@@ -31,7 +31,7 @@ const ApiClient = {
     },
 
     getApiKey() {
-        return localStorage.getItem('sia_api_key') || 'test_token_123';
+        return localStorage.getItem('sia_api_key') || 'YOUR_API_KEY_HERE';
     },
 
     async parseJsonResponse(response) {

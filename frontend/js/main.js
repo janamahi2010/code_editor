@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     settingsToggle.addEventListener('click', () => {
         backendUrlInput.value = localStorage.getItem('sia_backend_url_v2') || '';
-        apiKeyInput.value = localStorage.getItem('sia_api_key') || 'test_token_123';
+        apiKeyInput.value = localStorage.getItem('sia_api_key') || '';
         settingsModal.classList.add('open');
     });
 
