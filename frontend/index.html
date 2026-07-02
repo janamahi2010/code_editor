@@ -11,7 +11,7 @@
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=5">
     <!-- Monaco Editor Loader -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
 </head>
@@ -48,21 +48,9 @@
                 <div class="sidebar-section">
                     <h3><i class="fa-solid fa-file-code"></i> Templates</h3>
                     <ul class="template-list">
-                        <li class="template-item active" data-template="bell">
-                            <span class="template-title">Bell State</span>
-                            <span class="template-desc">Entangles 2 qubits (H + CNOT)</span>
-                        </li>
-                        <li class="template-item" data-template="ghz">
-                            <span class="template-title">GHZ State</span>
-                            <span class="template-desc">Entangles 3 qubits (H + 2 CNOT)</span>
-                        </li>
-                        <li class="template-item" data-template="superposition">
-                            <span class="template-title">Superposition</span>
-                            <span class="template-desc">Hadamard on 5 qubits</span>
-                        </li>
-                        <li class="template-item" data-template="custom">
-                            <span class="template-title">Blank Editor</span>
-                            <span class="template-desc">Write your own quantum algorithm</span>
+                        <li class="template-item active" data-template="ghz-shots">
+                            <span class="template-title">GHZ Shots</span>
+                            <span class="template-desc">200-shot GHZ measurement distribution</span>
                         </li>
                     </ul>
                 </div>
@@ -158,8 +146,8 @@ Choose a template and click "Run Program" to execute.
     </div>
 
     <!-- Core Scripts -->
-    <script src="js/api.js"></script>
-    <script src="js/editor.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/api.js?v=5"></script>
+    <script src="js/editor.js?v=5"></script>
+    <script src="js/main.js?v=5"></script>
 </body>
 </html>

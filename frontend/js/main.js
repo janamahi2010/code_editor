@@ -2,83 +2,51 @@
 
 // Configuration Templates Generator
 function getTemplateCode(templateName) {
-    const backendUrl = ApiClient.getBackendUrl();
+    const hdqsUrl = ApiClient.getHdqsServiceUrl();
     const apiKey = ApiClient.getApiKey();
 
-    const templates = {
-        bell: `from sia import hdqs
+    return `from collections import defaultdict
+from sia import hdqs, HDQSError
 
-# Connect to the local or remote quantum server
-q = hdqs(
-    base_url="${backendUrl}",
-    api_key="${apiKey}"
-)
+def main():
+    BASE_URL = "${hdqsUrl}"
+    API_KEY = "${apiKey}"
+    SHOTS = 20
 
-# Create a qubit register with 2 qubits
-print("Initializing register...")
-q.qbt_create(num_qubits=2)
+    q = hdqs(base_url=BASE_URL, api_key=API_KEY)
 
-# Create a Bell state: |00> + |11> / sqrt(2)
-print("Applying Hadamard to qubit 0 & CNOT to qubits (0, 1)...")
-q.qbt_run(["h 0", "cnot 0 1"])
+    counts = defaultdict(int)
 
-print("Done")
-`,
-        ghz: `from sia import hdqs
+    for _ in range(SHOTS):
+        # Create 3 qubits
+        q.qbt_create(num_qubits=3)
 
-# Connect to the quantum backend
-q = hdqs(
-    base_url="${backendUrl}",
-    api_key="${apiKey}"
-)
+        # GHZ State: H + 2 CNOTs
+        q.qbt_run([
+            "h 0",
+            "cx 0 1",
+            "cx 1 2"
+        ])
 
-# Initialize a 3-qubit register
-print("Initializing register...")
-q.qbt_create(num_qubits=3)
+        # Measure all 3 qubits
+        meas = q.qbt_measure([0, 1, 2], collapse=True)
 
-# Create a GHZ state: |000> + |111> / sqrt(2)
-print("Applying H 0 and CNOT cascade...")
-q.qbt_run(["h 0", "cnot 0 1", "cnot 1 2"])
+        bits = ""
+        for r in meas["result"]["measurement_results"]:
+            bits += str(r["result"])
 
-print("Done")
-`,
-        superposition: `from sia import hdqs
+        counts[bits] += 1
 
-# Connect to the quantum backend
-q = hdqs(
-    base_url="${backendUrl}",
-    api_key="${apiKey}"
-)
+    print("GHZ State Measurement Distribution:")
+    for state, count in sorted(counts.items()):
+        print(f"{state}: {count}")
 
-# Initialize a 5-qubit register
-print("Initializing register...")
-q.qbt_create(num_qubits=5)
-
-# Place all 5 qubits into superposition: 1/sqrt(32) for each state
-print("Applying Hadamard to all 5 qubits...")
-q.qbt_run([
-    "h 0",
-    "h 1",
-    "h 2",
-    "h 3",
-    "h 4"
-])
-
-print("Done")
-`,
-        custom: `# Write Python code safely in the sandbox
-import numpy as np
-import math
-
-print("Hello from the Quantum Sandbox!")
-# NumPy operations are supported:
-arr = np.array([1.0, 2.0, 3.0])
-print("Array:", arr)
-print("Pi:", math.pi)
-`
-    };
-
-    return templates[templateName] || templates['custom'];
+if __name__ == "__main__":
+    try:
+        main()
+    except HDQSError as e:
+        print("HDQS Error:", e)
+`;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -89,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const statusElement = document.getElementById('editor-status');
 
     try {
-        const initialCode = getTemplateCode('bell');
+        const initialCode = getTemplateCode('ghz-shots');
         await initializeMonacoEditor(initialCode);
         statusElement.textContent = 'Ready';
     } catch (err) {
@@ -142,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const apiKeyInput = document.getElementById('api-key-input');
 
     settingsToggle.addEventListener('click', () => {
-        backendUrlInput.value = localStorage.getItem('sia_backend_url') || '';
+        backendUrlInput.value = localStorage.getItem('sia_backend_url_v2') || '';
         apiKeyInput.value = localStorage.getItem('sia_api_key') || 'test_token_123';
         settingsModal.classList.add('open');
     });
@@ -153,7 +121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     saveSettings.addEventListener('click', () => {
         const backendUrl = backendUrlInput.value.trim();
-        localStorage.setItem('sia_backend_url', backendUrl ? ApiClient.cleanUrl(backendUrl) : '');
+        localStorage.setItem('sia_backend_url_v2', backendUrl ? ApiClient.cleanUrl(backendUrl) : '');
         localStorage.setItem('sia_api_key', apiKeyInput.value.trim());
         hideModal();
         

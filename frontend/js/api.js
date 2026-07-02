@@ -1,18 +1,23 @@
 // Backend and API Communication Client
 
 const ApiClient = {
-    DEPLOYED_BACKEND_URL: 'https://code-editor-pq97.onrender.com',
+    // Real external HDQS quantum service (separate infrastructure, not part of this repo).
+    // Used only as the base_url baked into sandboxed script templates.
+    HDQS_SERVICE_URL: 'http://31.97.239.213:8000',
 
+    // Execution backend: this repo's own FastAPI app, which serves /run and always
+    // serves the frontend it's running (see main.py's StaticFiles mount), so
+    // same-origin is correct regardless of where this app is deployed.
     getBackendUrl() {
-        const storedUrl = localStorage.getItem('sia_backend_url');
+        const storedUrl = localStorage.getItem('sia_backend_url_v2');
         if (storedUrl && storedUrl.trim() !== '') {
             return this.cleanUrl(storedUrl);
         }
-        if (window.location.hostname === 'code-editor-1-l8ec.onrender.com') {
-            return this.DEPLOYED_BACKEND_URL;
-        }
-        // Default to same origin where static page is served, useful when FastAPI serves the frontend.
         return window.location.origin;
+    },
+
+    getHdqsServiceUrl() {
+        return this.HDQS_SERVICE_URL;
     },
 
     cleanUrl(url) {
